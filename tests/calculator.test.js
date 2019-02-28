@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import { Calculator } from '../dist/terrain-profile';
+import { Calculator } from '../src/main';
 import { lineString, multiLineString } from './data';
 
 describe('Test Calculator', () => {

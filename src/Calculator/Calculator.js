@@ -1,4 +1,4 @@
-import { distance } from './helpers';
+import { distance } from '../helpers';
 
 /**
  * Use this class for calculating profile parameters

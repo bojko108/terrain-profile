@@ -1,26 +1,10 @@
 /**
- * Flattens the input array and returns a new array
- * @param {!Array} list 
- * @return {Array}
- */
-export function flatten(list) {
-  return list.reduce((a, b) => a.concat(Array.isArray(b) ? flatten(b) : b), []);
-}
-/**
  * Converts decimal degrees to radians
  * @param {!Number} deg 
  * @return {Number}
  */
 export function deg2rad(deg) {
   return (deg * Math.PI) / 180.0;
-}
-/**
- * Converts radians to decimal degrees 
- * @param {!Number} rad 
- * @return {Number}
- */
-export function rad2deg(rad) {
-  return (rad * 180) / Math.PI;
 }
 
 /**

@@ -1,3 +1,4 @@
-import Calculator from './Calculator';
-import Drawer from './Drawer';
-export { Calculator, Drawer };
+import Calculator from './Calculator/Calculator';
+import Drawer from './Drawer/Drawer';
+
+export { Drawer, Calculator };

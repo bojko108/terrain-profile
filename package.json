@@ -1,0 +1,36 @@
+{
+  "name": "terrain-profile",
+  "version": "1.0.0",
+  "description": "Calculates and draws a terrain profile",
+  "author": "bojko108 <bojko108@gmail.com>",
+  "main": "./dist/terrain-profile.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bojko108/terrain-profile.git"
+  },
+  "keywords": [
+    "profile",
+    "terrain"
+  ],
+  "scripts": {
+    "patch": "npm version patch --no-git-tag-version && npm run build",
+    "minor": "npm version minor --no-git-tag-version && npm run build",
+    "major": "npm version major --no-git-tag-version && npm run build",
+    "build": "rollup --config ./config/build.js && npm run test:nowatch",
+    "test": "mocha --watch --require babel-core/register ./tests/**/*.test.js",
+    "test:nowatch": "mocha --require babel-core/register ./tests/**/*.test.js"
+  },
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "babel": "^6.23.0",
+    "babel-core": "^6.26.3",
+    "babel-preset-es2015": "^6.24.1",
+    "chai": "^4.2.0",
+    "mocha": "^5.2.0",
+    "rollup": "^0.54.0",
+    "rollup-plugin-cleanup": "^2.0.0",
+    "rollup-plugin-commonjs": "^8.2.6",
+    "rollup-plugin-node-resolve": "^3.0.2"
+  }
+}

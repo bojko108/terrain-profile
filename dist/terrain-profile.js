@@ -7450,7 +7450,7 @@ class Drawer {
         .attr('font-size', '10')
         .attr('text-anchor', 'end')
         .attr('startOffset', '100%')
-        .text('Elevation gain:')
+        .text('Ascending:')
         .append('tspan')
         .text(` ${this._calculator.parameters.ascend} m`);
 
@@ -7465,7 +7465,7 @@ class Drawer {
         .attr('font-size', '10')
         .attr('text-anchor', 'end')
         .attr('startOffset', '100%')
-        .text('Elevation lost:')
+        .text('Descending:')
         .append('tspan')
         .text(` ${this._calculator.parameters.descend} m`);
     }

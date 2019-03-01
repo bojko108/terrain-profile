@@ -127,7 +127,7 @@ const drawer = new Drawer(multiLineString);
 drawer.getSVG();
 ```
 
-![profile](https://raw.githubusercontent.com/bojko108/terrain-profile/master/tests/example.svg?sanitize=true)
+![profile](https://github.com/bojko108/terrain-profile/blob/master/tests/example.png)
 
 Or you can modify the profile options:
 
@@ -143,7 +143,7 @@ const options = {
 drawer.getSVG(options);
 ```
 
-![profile2](https://raw.githubusercontent.com/bojko108/terrain-profile/master/tests/example2.svg?sanitize=true)
+![profile2](https://github.com/bojko108/terrain-profile/blob/master/tests/example2.png)
 
 Following listeners can be set (`options.liveProfile` should be set to `true` as well):
 

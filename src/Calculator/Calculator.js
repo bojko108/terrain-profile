@@ -6,15 +6,19 @@ import { distance } from '../helpers';
 export default class Calculator {
   /**
    * Creates profile calculator
-   * @param {!Object.<String,*>} geojson - Feature or geometry
+   * @param {!Object.<String,*>|Array.<Number>} inputGeometry - GeoJSON Feature or geometry, or array of coordinates
    */
-  constructor(geojson) {
+  constructor(inputGeometry) {
+    if (inputGeometry.type === 'Feature') {
+      inputGeometry = inputGeometry.geometry;
+    }
+
     /**
      * array of vertices
      * @private
      * @type {Array.<Object>}
      */
-    this._vertices = this._formatGeometry(geojson.type === 'Feature' ? geojson.geometry : geojson);
+    this._vertices = this._formatGeometry(inputGeometry);
     /**
      * profile parameters
      * @private
@@ -43,24 +47,28 @@ export default class Calculator {
   /**
    * Formats the input geometry
    * @private
-   * @param {!Object.<String,*>} geometry - `MultiLineString` or `LineString`
+   * @param {!Object.<String,*>|Array.<Number>} geometry - GeoJSON `MultiLineString` or `LineString`, or array of coordinates
    * @returns {Object.<String,*>}
    */
   _formatGeometry(geometry) {
     if (!geometry) throw 'Geometry not set';
 
-    const type = geometry.type;
-
-    if (type !== 'MultiLineString' && type !== 'LineString') throw `Geometry is not supported: ${type}`;
-
-    if (type === 'MultiLineString') {
-      let array = [];
-      geometry.coordinates.forEach(part => {
-        array.push(...part.map(vertex => this._formatVertex(vertex)));
-      });
-      return array;
+    if (Array.isArray(geometry)) {
+      return geometry.map(vertex => this._formatVertex(vertex));
     } else {
-      return geometry.coordinates.map(vertex => this._formatVertex(vertex));
+      const type = geometry.type;
+
+      if (type !== 'MultiLineString' && type !== 'LineString') throw `Geometry is not supported: ${type}`;
+
+      if (type === 'MultiLineString') {
+        let array = [];
+        geometry.coordinates.forEach(part => {
+          array.push(...part.map(vertex => this._formatVertex(vertex)));
+        });
+        return array;
+      } else {
+        return geometry.coordinates.map(vertex => this._formatVertex(vertex));
+      }
     }
   }
   /**

@@ -12,7 +12,7 @@ import Calculator from '../Calculator/Calculator';
 export default class Drawer {
   /**
    * Creates an instance of Drawer.
-   * @param {!Object.<String,*>} profileData - profile data - an array of points with 
+   * @param {!Object.<String,*>} profileData - profile data - an array of points with
    * elevation data
    * @param {Function} onEnter - callback on mouse in
    * @param {Function} onMove - callback on mouse move
@@ -24,13 +24,6 @@ export default class Drawer {
      * @type {Object.<String,*>}
      */
     this._calculator = new Calculator(profileData);
-
-    /**
-     * profile appearence options
-     * @private
-     * @type {Object.<String,*>}
-     */
-    this._options = defaultOptions;
 
     this._onEnter = onEnter;
     this._onMove = onMove;
@@ -67,79 +60,31 @@ export default class Drawer {
 
   /**
    * get profile as SVG element
-   * @param {Object.<String,*>} [parameters] - see {@link this._options}
+   * @param {Object.<String,*>} parameters
    * @return {SVGElement}
    */
   getSVG(parameters = {}) {
     const profileOptions = {
-      width: parameters.width !== undefined ? parameters.width : this._options.width,
-      height: parameters.height !== undefined ? parameters.height : this._options.height,
+      width: parameters.width !== undefined ? parameters.width : defaultOptions.width,
+      height: parameters.height !== undefined ? parameters.height : defaultOptions.height,
 
       profileStyle: {
-        liveProfile:
-          parameters.profileStyle && parameters.profileStyle.liveProfile !== undefined
-            ? parameters.profileStyle.liveProfile
-            : this._options.profileStyle.liveProfile,
-        zoomProfile:
-          parameters.profileStyle && parameters.profileStyle.zoomProfile !== undefined
-            ? parameters.profileStyle.zoomProfile
-            : this._options.profileStyle.zoomProfile,
-        showOnMap:
-          parameters.profileStyle && parameters.profileStyle.showOnMap !== undefined
-            ? parameters.profileStyle.showOnMap
-            : this._options.profileStyle.showOnMap,
-        showLabels:
-          parameters.profileStyle && parameters.profileStyle.showLabels !== undefined
-            ? parameters.profileStyle.showLabels
-            : this._options.profileStyle.showLabels,
-        showDistanceAxis:
-          parameters.profileStyle && parameters.profileStyle.showDistanceAxis !== undefined
-            ? parameters.profileStyle.showDistanceAxis
-            : this._options.profileStyle.showDistanceAxis,
-        showHeightAxis:
-          parameters.profileStyle && parameters.profileStyle.showHeightAxis !== undefined
-            ? parameters.profileStyle.showHeightAxis
-            : this._options.profileStyle.showHeightAxis,
-        heightsTicksDivider:
-          parameters.profileStyle && parameters.profileStyle.heightsTicksDivider !== undefined
-            ? parameters.profileStyle.heightsTicksDivider
-            : this._options.profileStyle.heightsTicksDivider,
+        liveProfile: parameters.liveProfile !== undefined ? parameters.liveProfile : defaultOptions.liveProfile,
+        zoomProfile: parameters.zoomProfile !== undefined ? parameters.zoomProfile : defaultOptions.zoomProfile,
+        showLabels: parameters.showLabels !== undefined ? parameters.showLabels : defaultOptions.showLabels,
+        showDistanceAxis: parameters.showDistanceAxis !== undefined ? parameters.showDistanceAxis : defaultOptions.showDistanceAxis,
+        showHeightAxis: parameters.showHeightAxis !== undefined ? parameters.showHeightAxis : defaultOptions.showHeightAxis,
+        heightsTicksDivider: parameters.heightsTicksDivider !== undefined ? parameters.heightsTicksDivider : defaultOptions.heightsTicksDivider,
         distancesTicksDivider:
-          parameters.profileStyle && parameters.profileStyle.distancesTicksDivider !== undefined
-            ? parameters.profileStyle.distancesTicksDivider
-            : this._options.profileStyle.distancesTicksDivider,
-        backgroundColor:
-          parameters.profileStyle && parameters.profileStyle.backgroundColor !== undefined
-            ? parameters.profileStyle.backgroundColor
-            : this._options.profileStyle.backgroundColor,
-        profileFillColor:
-          parameters.profileStyle && parameters.profileStyle.profileFillColor !== undefined
-            ? parameters.profileStyle.profileFillColor
-            : this._options.profileStyle.profileFillColor,
-        profileStrokeColor:
-          parameters.profileStyle && parameters.profileStyle.profileStrokeColor !== undefined
-            ? parameters.profileStyle.profileStrokeColor
-            : this._options.profileStyle.profileStrokeColor,
-        profileStrokeWidth:
-          parameters.profileStyle && parameters.profileStyle.profileStrokeWidth !== undefined
-            ? parameters.profileStyle.profileStrokeWidth
-            : this._options.profileStyle.profileStrokeWidth,
-        infoColor:
-          parameters.profileStyle && parameters.profileStyle.infoColor !== undefined
-            ? parameters.profileStyle.infoColor
-            : this._options.profileStyle.infoColor,
-        infoLineStrokeWidth:
-          parameters.profileStyle && parameters.profileStyle.infoLineStrokeWidth !== undefined
-            ? parameters.profileStyle.infoLineStrokeWidth
-            : this._options.profileStyle.infoLineStrokeWidth,
-        infoLineStrokeColor:
-          parameters.profileStyle && parameters.profileStyle.infoLineStrokeColor !== undefined
-            ? parameters.profileStyle.infoLineStrokeColor
-            : this._options.profileStyle.infoLineStrokeColor,
-        infoLineStrokeDash:
-          parameters.profileStyle && parameters.profileStyle.infoLineStrokeDash !== undefined
-            ? parameters.profileStyle.infoLineStrokeDash
-            : this._options.profileStyle.infoLineStrokeDash
+          parameters.distancesTicksDivider !== undefined ? parameters.distancesTicksDivider : defaultOptions.distancesTicksDivider,
+        backgroundColor: parameters.backgroundColor !== undefined ? parameters.backgroundColor : defaultOptions.backgroundColor,
+        profileFillColor: parameters.profileFillColor !== undefined ? parameters.profileFillColor : defaultOptions.profileFillColor,
+        profileStrokeColor: parameters.profileStrokeColor !== undefined ? parameters.profileStrokeColor : defaultOptions.profileStrokeColor,
+        profileStrokeWidth: parameters.profileStrokeWidth !== undefined ? parameters.profileStrokeWidth : defaultOptions.profileStrokeWidth,
+        infoColor: parameters.infoColor !== undefined ? parameters.infoColor : defaultOptions.infoColor,
+        infoLineStrokeWidth: parameters.infoLineStrokeWidth !== undefined ? parameters.infoLineStrokeWidth : defaultOptions.infoLineStrokeWidth,
+        infoLineStrokeColor: parameters.infoLineStrokeColor !== undefined ? parameters.infoLineStrokeColor : defaultOptions.infoLineStrokeColor,
+        infoLineStrokeDash: parameters.infoLineStrokeDash !== undefined ? parameters.infoLineStrokeDash : defaultOptions.infoLineStrokeDash
       }
     };
 
@@ -345,6 +290,7 @@ export default class Drawer {
         .attr('y', height + 35)
         .attr('x', width)
         .attr('font-family', 'sans-serif')
+        .attr('font-size', '10')
         .attr('text-anchor', 'end')
         .attr('startOffset', '100%')
         .text('Total distance:')
@@ -359,6 +305,7 @@ export default class Drawer {
         .attr('y', height + 50)
         .attr('x', width)
         .attr('font-family', 'sans-serif')
+        .attr('font-size', '10')
         .attr('text-anchor', 'end')
         .attr('startOffset', '100%')
         .text('Elevation gain:')
@@ -373,6 +320,7 @@ export default class Drawer {
         .attr('y', height + 65)
         .attr('x', width)
         .attr('font-family', 'sans-serif')
+        .attr('font-size', '10')
         .attr('text-anchor', 'end')
         .attr('startOffset', '100%')
         .text('Elevation lost:')

@@ -1,5 +1,5 @@
 /** 
- * terrain-profile - v1.1.0
+ * terrain-profile - v1.1.1
  * description: Calculates and draws a terrain profile
  * author: bojko108 <bojko108@gmail.com>
  * 
@@ -44,15 +44,19 @@ function distance(start, end) {
 class Calculator {
   /**
    * Creates profile calculator
-   * @param {!Object.<String,*>} geojson - Feature or geometry
+   * @param {!Object.<String,*>|Array.<Number>} inputGeometry - GeoJSON Feature or geometry, or array of coordinates
    */
-  constructor(geojson) {
+  constructor(inputGeometry) {
+    if (inputGeometry.type === 'Feature') {
+      inputGeometry = inputGeometry.geometry;
+    }
+
     /**
      * array of vertices
      * @private
      * @type {Array.<Object>}
      */
-    this._vertices = this._formatGeometry(geojson.type === 'Feature' ? geojson.geometry : geojson);
+    this._vertices = this._formatGeometry(inputGeometry);
     /**
      * profile parameters
      * @private
@@ -81,24 +85,28 @@ class Calculator {
   /**
    * Formats the input geometry
    * @private
-   * @param {!Object.<String,*>} geometry - `MultiLineString` or `LineString`
+   * @param {!Object.<String,*>|Array.<Number>} geometry - GeoJSON `MultiLineString` or `LineString`, or array of coordinates
    * @returns {Object.<String,*>}
    */
   _formatGeometry(geometry) {
     if (!geometry) throw 'Geometry not set';
 
-    const type = geometry.type;
-
-    if (type !== 'MultiLineString' && type !== 'LineString') throw `Geometry is not supported: ${type}`;
-
-    if (type === 'MultiLineString') {
-      let array = [];
-      geometry.coordinates.forEach(part => {
-        array.push(...part.map(vertex => this._formatVertex(vertex)));
-      });
-      return array;
+    if (Array.isArray(geometry)) {
+      return geometry.map(vertex => this._formatVertex(vertex));
     } else {
-      return geometry.coordinates.map(vertex => this._formatVertex(vertex));
+      const type = geometry.type;
+
+      if (type !== 'MultiLineString' && type !== 'LineString') throw `Geometry is not supported: ${type}`;
+
+      if (type === 'MultiLineString') {
+        let array = [];
+        geometry.coordinates.forEach(part => {
+          array.push(...part.map(vertex => this._formatVertex(vertex)));
+        });
+        return array;
+      } else {
+        return geometry.coordinates.map(vertex => this._formatVertex(vertex));
+      }
     }
   }
   /**
@@ -7104,59 +7112,49 @@ function d3Zoom() {
 
 /**
  * get default profile appearence options
- * @static
- * @public
- * @return {Object.<String,*>}
  * @param {Object.<String,*>} defaultOptions - profile appearence options
  * @param {Number} [defaultOptions.width=600] - profile full width in pixels (including labels)
  * @param {Number} [defaultOptions.height=200] - profile full height in pixels(including labels)
- * @param {Object.<String,*>} defaultOptions.profileStyle - profile graph options
- * @param {Boolean} [options.profileStyle.liveProfile=true] - display elevation value on mouse move
- * @param {Boolean} [defaultOptions.profileStyle.zoomProfile=true] - option to zoom in the profile graph
- * @param {Boolean} [defaultOptions.profileStyle.showOnMap=true] - display profile location on the map on mouse move
- * @param {Boolean} [defaultOptions.profileStyle.showLabels=false] - display additional labels - total distance, denivelation...
- * @param {Boolean} [defaultOptions.profileStyle.showDistanceAxis=false] - display distances axis - bottom axis
- * @param {Boolean} [defaultOptions.profileStyle.showHeightAxis=false] - display elevation axis - left axis
- * @param {Number} [defaultOptions.profileStyle.heightsTicksDivider=50] - divider for heights ticks. Use smaller values like `20`
- * to generate more ticks
- * @param {Number} [defaultOptions.profileStyle.distancesTicksDivider=50] -  - divider for distances ticks. Use smaller values like `20`
- * to generate more ticks
- * @param {String} [defaultOptions.profileStyle.backgroundColor='#CCFFFF'] - sky color
- * @param {String} [defaultOptions.profileStyle.profileFillColor='#6CBB3C'] - terrain color
- * @param {String} [defaultOptions.profileStyle.profileStrokeColor='#41A317'] - terrain stroke color
- * @param {Number} [defaultOptions.profileStyle.profileStrokeWidth=3] - terrain stroke width
- * @param {String} [defaultOptions.profileStyle.infoColor='#000000'] - info overlay color
- * @param {Number} [defaultOptions.profileStyle.infoLineStrokeWidth=2] - vertical info line width
- * @param {String} [defaultOptions.profileStyle.infoLineStrokeColor='#FF0000'] - vertical info line color
- * @param {String} [defaultOptions.profileStyle.infoLineStrokeDash='0'] - vertical info line dash array, examples: '0', '5,5', '10,2,10'...
+ * @param {Boolean} [defaultOptions.liveProfile=true] - display elevation value on mouse move
+ * @param {Boolean} [defaultOptions.zoomProfile=true] - option to zoom in the profile graph
+ * @param {Boolean} [defaultOptions.showLabels=false] - display additional labels - total distance, denivelation...
+ * @param {Boolean} [defaultOptions.showDistanceAxis=false] - display distances axis - bottom axis
+ * @param {Boolean} [defaultOptions.showHeightAxis=false] - display elevation axis - left axis
+ * @param {Number} [defaultOptions.heightsTicksDivider=50] - divider for heights ticks. Use smaller values like `20` to generate more ticks
+ * @param {Number} [defaultOptions.distancesTicksDivider=50] - divider for distances ticks. Use smaller values like `20` to generate more ticks
+ * @param {String} [defaultOptions.backgroundColor='#CCFFFF'] - sky color
+ * @param {String} [defaultOptions.profileFillColor='#6CBB3C'] - terrain color
+ * @param {String} [defaultOptions.profileStrokeColor='#41A317'] - terrain stroke color
+ * @param {Number} [defaultOptions.profileStrokeWidth=3] - terrain stroke width
+ * @param {String} [defaultOptions.infoColor='#000000'] - info overlay color
+ * @param {Number} [defaultOptions.infoLineStrokeWidth=2] - vertical info line width
+ * @param {String} [defaultOptions.infoLineStrokeColor='#FF0000'] - vertical info line color
+ * @param {String} [defaultOptions.infoLineStrokeDash='0'] - vertical info line dash array, examples: '0', '5,5', '10,2,10'...
  */
 const defaultOptions = {
   width: 600,
   height: 200,
-  profileStyle: {
-    liveProfile: true,
-    zoomProfile: true,
-    showOnMap: true,
-    showLabels: false,
-    showDistanceAxis: false,
-    showHeightAxis: false,
-    heightsTicksDivider: 50,
-    distancesTicksDivider: 50,
-    backgroundColor: '#CCFFFF',
-    profileFillColor: '#6CBB3C',
-    profileStrokeColor: '#41A317',
-    profileStrokeWidth: 3,
-    infoColor: '#000000',
-    infoLineStrokeWidth: 2,
-    infoLineStrokeColor: '#FF0000',
-    infoLineStrokeDash: '0'
-  }
+  liveProfile: true,
+  zoomProfile: true,
+  showLabels: false,
+  showDistanceAxis: false,
+  showHeightAxis: false,
+  heightsTicksDivider: 50,
+  distancesTicksDivider: 50,
+  backgroundColor: '#CCFFFF',
+  profileFillColor: '#6CBB3C',
+  profileStrokeColor: '#41A317',
+  profileStrokeWidth: 3,
+  infoColor: '#000000',
+  infoLineStrokeWidth: 2,
+  infoLineStrokeColor: '#FF0000',
+  infoLineStrokeDash: '0'
 };
 
 class Drawer {
   /**
    * Creates an instance of Drawer.
-   * @param {!Object.<String,*>} profileData - profile data - an array of points with 
+   * @param {!Object.<String,*>} profileData - profile data - an array of points with
    * elevation data
    * @param {Function} onEnter - callback on mouse in
    * @param {Function} onMove - callback on mouse move
@@ -7168,13 +7166,6 @@ class Drawer {
      * @type {Object.<String,*>}
      */
     this._calculator = new Calculator(profileData);
-
-    /**
-     * profile appearence options
-     * @private
-     * @type {Object.<String,*>}
-     */
-    this._options = defaultOptions;
 
     this._onEnter = onEnter;
     this._onMove = onMove;
@@ -7211,79 +7202,31 @@ class Drawer {
 
   /**
    * get profile as SVG element
-   * @param {Object.<String,*>} [parameters] - see {@link this._options}
+   * @param {Object.<String,*>} parameters
    * @return {SVGElement}
    */
   getSVG(parameters = {}) {
     const profileOptions = {
-      width: parameters.width !== undefined ? parameters.width : this._options.width,
-      height: parameters.height !== undefined ? parameters.height : this._options.height,
+      width: parameters.width !== undefined ? parameters.width : defaultOptions.width,
+      height: parameters.height !== undefined ? parameters.height : defaultOptions.height,
 
       profileStyle: {
-        liveProfile:
-          parameters.profileStyle && parameters.profileStyle.liveProfile !== undefined
-            ? parameters.profileStyle.liveProfile
-            : this._options.profileStyle.liveProfile,
-        zoomProfile:
-          parameters.profileStyle && parameters.profileStyle.zoomProfile !== undefined
-            ? parameters.profileStyle.zoomProfile
-            : this._options.profileStyle.zoomProfile,
-        showOnMap:
-          parameters.profileStyle && parameters.profileStyle.showOnMap !== undefined
-            ? parameters.profileStyle.showOnMap
-            : this._options.profileStyle.showOnMap,
-        showLabels:
-          parameters.profileStyle && parameters.profileStyle.showLabels !== undefined
-            ? parameters.profileStyle.showLabels
-            : this._options.profileStyle.showLabels,
-        showDistanceAxis:
-          parameters.profileStyle && parameters.profileStyle.showDistanceAxis !== undefined
-            ? parameters.profileStyle.showDistanceAxis
-            : this._options.profileStyle.showDistanceAxis,
-        showHeightAxis:
-          parameters.profileStyle && parameters.profileStyle.showHeightAxis !== undefined
-            ? parameters.profileStyle.showHeightAxis
-            : this._options.profileStyle.showHeightAxis,
-        heightsTicksDivider:
-          parameters.profileStyle && parameters.profileStyle.heightsTicksDivider !== undefined
-            ? parameters.profileStyle.heightsTicksDivider
-            : this._options.profileStyle.heightsTicksDivider,
+        liveProfile: parameters.liveProfile !== undefined ? parameters.liveProfile : defaultOptions.liveProfile,
+        zoomProfile: parameters.zoomProfile !== undefined ? parameters.zoomProfile : defaultOptions.zoomProfile,
+        showLabels: parameters.showLabels !== undefined ? parameters.showLabels : defaultOptions.showLabels,
+        showDistanceAxis: parameters.showDistanceAxis !== undefined ? parameters.showDistanceAxis : defaultOptions.showDistanceAxis,
+        showHeightAxis: parameters.showHeightAxis !== undefined ? parameters.showHeightAxis : defaultOptions.showHeightAxis,
+        heightsTicksDivider: parameters.heightsTicksDivider !== undefined ? parameters.heightsTicksDivider : defaultOptions.heightsTicksDivider,
         distancesTicksDivider:
-          parameters.profileStyle && parameters.profileStyle.distancesTicksDivider !== undefined
-            ? parameters.profileStyle.distancesTicksDivider
-            : this._options.profileStyle.distancesTicksDivider,
-        backgroundColor:
-          parameters.profileStyle && parameters.profileStyle.backgroundColor !== undefined
-            ? parameters.profileStyle.backgroundColor
-            : this._options.profileStyle.backgroundColor,
-        profileFillColor:
-          parameters.profileStyle && parameters.profileStyle.profileFillColor !== undefined
-            ? parameters.profileStyle.profileFillColor
-            : this._options.profileStyle.profileFillColor,
-        profileStrokeColor:
-          parameters.profileStyle && parameters.profileStyle.profileStrokeColor !== undefined
-            ? parameters.profileStyle.profileStrokeColor
-            : this._options.profileStyle.profileStrokeColor,
-        profileStrokeWidth:
-          parameters.profileStyle && parameters.profileStyle.profileStrokeWidth !== undefined
-            ? parameters.profileStyle.profileStrokeWidth
-            : this._options.profileStyle.profileStrokeWidth,
-        infoColor:
-          parameters.profileStyle && parameters.profileStyle.infoColor !== undefined
-            ? parameters.profileStyle.infoColor
-            : this._options.profileStyle.infoColor,
-        infoLineStrokeWidth:
-          parameters.profileStyle && parameters.profileStyle.infoLineStrokeWidth !== undefined
-            ? parameters.profileStyle.infoLineStrokeWidth
-            : this._options.profileStyle.infoLineStrokeWidth,
-        infoLineStrokeColor:
-          parameters.profileStyle && parameters.profileStyle.infoLineStrokeColor !== undefined
-            ? parameters.profileStyle.infoLineStrokeColor
-            : this._options.profileStyle.infoLineStrokeColor,
-        infoLineStrokeDash:
-          parameters.profileStyle && parameters.profileStyle.infoLineStrokeDash !== undefined
-            ? parameters.profileStyle.infoLineStrokeDash
-            : this._options.profileStyle.infoLineStrokeDash
+          parameters.distancesTicksDivider !== undefined ? parameters.distancesTicksDivider : defaultOptions.distancesTicksDivider,
+        backgroundColor: parameters.backgroundColor !== undefined ? parameters.backgroundColor : defaultOptions.backgroundColor,
+        profileFillColor: parameters.profileFillColor !== undefined ? parameters.profileFillColor : defaultOptions.profileFillColor,
+        profileStrokeColor: parameters.profileStrokeColor !== undefined ? parameters.profileStrokeColor : defaultOptions.profileStrokeColor,
+        profileStrokeWidth: parameters.profileStrokeWidth !== undefined ? parameters.profileStrokeWidth : defaultOptions.profileStrokeWidth,
+        infoColor: parameters.infoColor !== undefined ? parameters.infoColor : defaultOptions.infoColor,
+        infoLineStrokeWidth: parameters.infoLineStrokeWidth !== undefined ? parameters.infoLineStrokeWidth : defaultOptions.infoLineStrokeWidth,
+        infoLineStrokeColor: parameters.infoLineStrokeColor !== undefined ? parameters.infoLineStrokeColor : defaultOptions.infoLineStrokeColor,
+        infoLineStrokeDash: parameters.infoLineStrokeDash !== undefined ? parameters.infoLineStrokeDash : defaultOptions.infoLineStrokeDash
       }
     };
 
@@ -7489,6 +7432,7 @@ class Drawer {
         .attr('y', height + 35)
         .attr('x', width)
         .attr('font-family', 'sans-serif')
+        .attr('font-size', '10')
         .attr('text-anchor', 'end')
         .attr('startOffset', '100%')
         .text('Total distance:')
@@ -7503,6 +7447,7 @@ class Drawer {
         .attr('y', height + 50)
         .attr('x', width)
         .attr('font-family', 'sans-serif')
+        .attr('font-size', '10')
         .attr('text-anchor', 'end')
         .attr('startOffset', '100%')
         .text('Elevation gain:')
@@ -7517,6 +7462,7 @@ class Drawer {
         .attr('y', height + 65)
         .attr('x', width)
         .attr('font-family', 'sans-serif')
+        .attr('font-size', '10')
         .attr('text-anchor', 'end')
         .attr('startOffset', '100%')
         .text('Elevation lost:')
@@ -7602,3 +7548,4 @@ class Drawer {
 
 exports.Drawer = Drawer;
 exports.Calculator = Calculator;
+exports.defaultOptions = defaultOptions;

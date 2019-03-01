@@ -1,6 +1,6 @@
 # terrain-profile
 
-Calculates and draws a terrain profile
+Calculates a terrain profile from GeoJSON or array of coordinates. The terrain profile can be drawn as SVG using [d3](https://www.npmjs.com/package/d3). Input data must have elevation values calculated as the calculator only calculates profile statistics based on the input data.
 
 ## Install
 
@@ -17,6 +17,34 @@ yarn add terrain-profile
 ```
 
 and then:
+
+```js
+import { Calculator, Drawer, defaultOptions } from 'terrain-profile';
+```
+
+# Info
+
+## Calculator
+
+Use this class to calculate profile statistics from GeoJSON feature or geometry. Currently it supports `MultiLineString` and `LineString` geometries. Input geometry should have elevation values as the calculator does not calculate them. Following profile parameters are calculated:
+
+| Parameter    | Info                           |
+| ------------ | ------------------------------ |
+| `length`     | total length in meters         |
+| `realLength` | total oblique length in meters |
+| `ascend`     | total ascending in meters      |
+| `descend`    | total descending in meters     |
+| `minh`       | minimum elevation in meters    |
+| `maxh`       | maximum elevation in meters    |
+
+And vertices are formatted as follows:
+
+| Parameter | Info                                    |
+| --------- | --------------------------------------- |
+| `lat`     | geographic latitude in decimal degrees  |
+| `lon`     | geographic longitude in decimal degrees |
+| `h`       | elevation in meters                     |
+| `dist`    | distance from start in meters           |
 
 ```js
 import { Calculator } from 'terrain-profile';
@@ -44,6 +72,17 @@ const multiLineString = {
 // calculate profile parameters
 const calculator = new Calculator(multiLineString);
 
+console.log(calculator.parameters);
+// result is:
+// {
+//     length: 252.23653171834349,
+//     realLength: 252.7660603467696,
+//     ascend: 8,
+//     descend: 4,
+//     minh: 560,
+//     maxh: 564
+// }
+
 console.log(calculator.vertices);
 // result is:
 // [
@@ -59,56 +98,107 @@ console.log(calculator.vertices);
 //   { lat: 42.094166, lon: 24.046428, h: 563, dist: 219.60321720630384 },
 //   { lat: 42.094171, lon: 24.046033, h: 564, dist: 252.23653171834349 }
 // ]
-
-console.log(calculator.parameters);
-// result is:
-// {
-//     length: 252.23653171834349,
-//     realLength: 252.7660603467696,
-//     ascend: 8,
-//     descend: 4,
-//     minh: 560,
-//     maxh: 564
-// }
 ```
-
-# Info
-
-## Calculator
-
-```js
-import { Calculator } from 'terrain-profile';
-```
-
-Use this class to calculate profile parameters from GeoJSON feature or geometry. Currently it supports `MultiLineString` and `LineString` geometries. Input geometry should have elevation values as the calculator does not calculate them. Following profile parameters are calculated:
-
-| Parameter    | Info                           |
-| ------------ | ------------------------------ |
-| `length`     | total length in meters         |
-| `realLength` | total oblique length in meters |
-| `ascend`     | total ascending in meters      |
-| `descend`    | total descending in meters     |
-| `minh`       | minimum elevation in meters    |
-| `maxh`       | maximum elevation in meters    |
-
-And vertices are formatted as follows:
-
-| Parameter | Info                                    |
-| --------- | --------------------------------------- |
-| `lat`     | geographic latitude in decimal degrees  |
-| `lon`     | geographic longitude in decimal degrees |
-| `h`       | elevation in meters                     |
-| `dist`    | distance from start in meters           |
 
 ## Drawer
 
-To be implemented
+Use this class to draw a terrain profile as SVG element. It uses [d3](https://www.npmjs.com/package/d3) to draw the chart. You can pass additional options to change the resulting SVG.
 
-<!-- ```js
+```js
 import { Drawer } from 'terrain-profile';
-``` -->
+
+// input geometry or feature
+const points = [
+  [24.048219, 42.093168, 560],
+  [24.048192, 42.093276, 561],
+  [24.048198, 42.093375, 562],
+  [24.048258, 42.093556, 563],
+  [24.048101, 42.093782, 562],
+  [24.047584, 42.093988, 560],
+  [24.046901, 42.094151, 561],
+  [24.046682, 42.094178, 560],
+  [24.046598, 42.094162, 562],
+  [24.046428, 42.094166, 563],
+  [24.046033, 42.094171, 564]
+];
+
+const drawer = new Drawer(multiLineString);
+// draw the profile
+drawer.getSVG();
+```
+
+![profile](https://raw.githubusercontent.com/bojko108/terrain-profile/master/tests/example.svg?sanitize=true)
+
+Or you can modify the profile options:
+
+```js
+const options = {
+  showLabels: true,
+  showDistanceAxis: true,
+  showHeightAxis: true,
+  profileFillColor: '#01ff70',
+  profileStrokeColor: '#3d9970'
+};
+
+drawer.getSVG(options);
+```
+
+![profile2](https://raw.githubusercontent.com/bojko108/terrain-profile/master/tests/example2.svg?sanitize=true)
+
+Following listeners can be set (`options.liveProfile` should be set to `true` as well):
+
+- `onEnter` - callback on mouse in
+- `onMove` - callback on mouse move
+- `onLeave` - callback on mouse out
+
+```js
+const drawer = new Drawer(
+  multiLineString,
+  () => {
+    console.log('on mouse in');
+  },
+  ({ lat, lon, dist, h }) => {
+    console.log('on mouse move');
+  },
+  () => {
+    console.log('on mouse out');
+  }
+);
+
+// OR
+
+drawer.onMove = ({ lat, lon, dist, h }) => {
+  console.log('on mouse move');
+};
+```
+
+## Default options
+
+Set of default options used for drawing a profile:
+
+| Parameter               | Info                                                              | Default Value |
+| ----------------------- | ----------------------------------------------------------------- | ------------- |
+| `width`                 | Total width in pixels                                             | 600           |
+| `height`                | Total height in pixels                                            | 200           |
+| `liveProfile`           | Display elevation value on mouse move.                            | true          |
+| `zoomProfile`           | Option to zoom in the profile graph                               | true          |
+| `showLabels`            | Display additional labels                                         | false         |
+| `showDistanceAxis`      | display distances axis - bottom axis                              | false         |
+| `showHeightAxis`        | Display elevation axis - left axis                                | false         |
+| `heightsTicksDivider`   | Divider for heights ticks. Use smaller values like `20`           | 50            |
+| `distancesTicksDivider` | Divider for distances ticks. Use smaller values like `20`         | 50            |
+| `backgroundColor`       | Sky color                                                         | `#CCFFFF`     |
+| `profileFillColor`      | Terrain color                                                     | `#6CBB3C`     |
+| `profileStrokeColor`    | Terrain stroke color                                              | `#41A317`     |
+| `profileStrokeWidth`    | Terrain stroke width                                              | 3             |
+| `infoColor`             | Info overlay color                                                | `#000000`     |
+| `infoLineStrokeWidth`   | Vertical info line width                                          | 2             |
+| `infoLineStrokeColor`   | Vertical info line color                                          | `#FF0000`     |
+| `infoLineStrokeDash`    | Vertical info line dash array, examples: '0', '5,5', '10,2,10'... | `0`           |
 
 ## Dependencies
+
+- [d3](https://www.npmjs.com/package/d3)
 
 ## Tests
 

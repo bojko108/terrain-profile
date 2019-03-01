@@ -1,7 +1,7 @@
 import { assert } from 'chai';
 import { distance } from '../src/helpers';
 
-describe('Helpers tests', () => {
+describe('Test helpers', () => {
   it('Should calculate distance', () => {
     let start = { lat: 42.0931683015078, lon: 24.0482193231583 };
     let end = { lat: 42.09327634423971, lon: 24.0481923334301 };

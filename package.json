@@ -1,6 +1,6 @@
 {
   "name": "terrain-profile",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Calculates and draws a terrain profile",
   "author": "bojko108 <bojko108@gmail.com>",
   "main": "./dist/terrain-profile.js",
